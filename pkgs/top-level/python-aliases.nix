@@ -286,6 +286,7 @@ mapAliases {
   flask_testing = throw "'flask_testing' has been renamed to/replaced by 'flask-testing'"; # Converted to throw 2025-10-29
   flask_wtf = throw "'flask_wtf' has been renamed to/replaced by 'flask-wtf'"; # Converted to throw 2025-10-29
   flaskbabel = throw "'flaskbabel' has been renamed to/replaced by 'flask-babel'"; # Converted to throw 2025-10-29
+  flipr-api = throw "'flipr-api' has been removed as the upstream repository is archived"; # Added 2026-11-01
   flowlogs_reader = throw "'flowlogs_reader' has been renamed to/replaced by 'flowlogs-reader'"; # Converted to throw 2025-10-29
   flufl_bounce = throw "'flufl_bounce' has been renamed to/replaced by 'flufl-bounce'"; # Converted to throw 2025-10-29
   flufl_i18n = throw "'flufl_i18n' has been renamed to/replaced by 'flufl-i18n'"; # Converted to throw 2025-10-29
@@ -757,6 +758,7 @@ mapAliases {
   sphinxcontrib_httpdomain = throw "'sphinxcontrib_httpdomain' has been renamed to/replaced by 'sphinxcontrib-httpdomain'"; # Converted to throw 2025-10-29
   sphinxcontrib_newsfeed = throw "'sphinxcontrib_newsfeed' has been renamed to/replaced by 'sphinxcontrib-newsfeed'"; # Converted to throw 2025-10-29
   sphinxcontrib_plantuml = throw "'sphinxcontrib_plantuml' has been renamed to/replaced by 'sphinxcontrib-plantuml'"; # Converted to throw 2025-10-29
+  spiderpy = throw "'spiderpy' has been removed as it is archived upstream and Spider is no longer available."; # Added 2026-11-04
   sqlalchemy-utc = throw "'sqlalchemy-utc' has been removed as it was unmaintained upstream"; # Added 2026-03-19
   sqlalchemy-views = throw "'sqlalchemy-views' has been removed as it was broken and unmaintained upstream"; # Added 2025-11-09
   sqlalchemy_1_3 = throw "'sqlalchemy_1_3' has been removed because it was actually version 1.4.54"; # added 2026-07-20

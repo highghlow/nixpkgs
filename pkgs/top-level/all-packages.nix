@@ -1916,7 +1916,6 @@ with pkgs;
   };
 
   inherit (callPackages ../tools/filesystems/garage { })
-    garage
     garage_1
     garage_2
     ;
@@ -4337,7 +4336,7 @@ with pkgs;
     pythonAttr = "python315FreeThreading";
     enableGIL = false;
   };
-  python316FreeThreading = python315.override {
+  python316FreeThreading = python316.override {
     self = python316FreeThreading;
     pythonAttr = "python316FreeThreading";
     enableGIL = false;
@@ -5815,7 +5814,7 @@ with pkgs;
     libprom
     ;
 
-  libtorrent-rasterbar = libtorrent-rasterbar-2_0_x;
+  libtorrent-rasterbar = libtorrent-rasterbar-2_1_x;
 
   libubox-nossl = libubox.override { with_ustream_ssl = false; };
 
@@ -8694,6 +8693,7 @@ with pkgs;
     rke2_1_34
     rke2_1_35
     rke2_1_36
+    rke2_1_37
     rke2_stable
     rke2_latest
     ;

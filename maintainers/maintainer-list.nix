@@ -447,6 +447,12 @@
     githubId = 241628;
     name = "Adam Russell";
   };
+  a4blue = {
+    email = "a4blue@hotmail.de";
+    github = "a4blue";
+    githubId = 1339417;
+    name = "Alexander Ratajczak";
+  };
   aacebedo = {
     email = "alexandre@acebedo.fr";
     github = "aacebedo";
@@ -9780,6 +9786,12 @@
     github = "fmthoma";
     githubId = 5918766;
     name = "Franz Thoma";
+  };
+  fnl = {
+    email = "nixos@finnloske.de";
+    github = "benular";
+    githubId = 136812920;
+    name = "Finn Loske";
   };
   fnune = {
     email = "fausto.nunez@mailbox.org";
@@ -20412,6 +20424,13 @@
     githubId = 9636071;
     name = "Myrl Hex";
   };
+  mysaa = {
+    name = "Samy Avrillon";
+    email = "mysaa@hadoly.fr";
+    github = "MysaaJava";
+    githubId = 33335046;
+    keys = [ { fingerprint = "8803 52F5 FD83 DF24 F414  13CC 4E77 7255 80DA 73CE"; } ];
+  };
   MysteryBlokHed = {
     name = "Adam Thompson-Sharpe";
     email = "nix@adamts.me";
@@ -21317,6 +21336,12 @@
     githubId = 131929;
     name = "Guilhem Saurel";
     keys = [ { fingerprint = "9B1A 7906 5D2F 2B80 6C8A  5A1C 7D2A CDAF 4653 CF28"; } ];
+  };
+  nimakalantar = {
+    name = "Nima Kalantar";
+    email = "nima.kalantar@focusrite.com";
+    github = "nimakalantar";
+    githubId = 113363856;
   };
   nindouja = {
     email = "nindouja@proton.me";
@@ -23685,6 +23710,11 @@
     name = "Peïo Thibault";
     github = "potb";
     githubId = 10779093;
+  };
+  potoo0 = {
+    name = "potoo0";
+    github = "potoo0";
+    githubId = 34411681;
   };
   pouya = {
     email = "me@pouyacode.net";
