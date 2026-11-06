@@ -14,7 +14,7 @@ stdenv.mkDerivation (finalAttrs: {
     url = "https://git.linux-nfs.org/?p=steved/libtirpc.git;a=snapshot;h=refs/tags/libtirpc-${
       lib.replaceStrings [ "." ] [ "-" ] finalAttrs.version
     };sf=tgz";
-    hash = "sha256-VGftEr3xzCp8O3oqCjIZozlq599gxN5IsHBRaG37GP4=";
+    hash = "sha256-fY0+BGy3Wir7ypop2WwrP1HeEaxuurEApaYjolpn4QE=";
     name = "${finalAttrs.pname}-${finalAttrs.version}.tar.gz";
   };
 
