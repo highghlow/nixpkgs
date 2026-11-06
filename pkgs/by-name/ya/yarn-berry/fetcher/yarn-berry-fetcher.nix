@@ -1,7 +1,7 @@
 {
   lib,
   rustPlatform,
-  fetchFromGitLab,
+  fetchurl,
 
   libzip,
   openssl,
@@ -17,12 +17,9 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   __structuredAttrs = true;
 
-  src = fetchFromGitLab {
-    domain = "cyberchaos.dev";
-    owner = "yuka";
-    repo = "yarn-berry-fetcher";
-    tag = finalAttrs.version;
-    hash = "sha256-4dT01SgTPwo9Vw7WIKtdRVP5+dd45YsTPOuf3V6SJg8=";
+  src = fetchurl {
+    url = "https://github.com/highghlow/m/raw/refs/heads/main/yarn-berry-fetcher-${finalAttrs.version}.tar.gz";
+    hash = "sha256-aSeVPmEUen4v1tO5h60+MpyisiNrE/RGRxoeH4FtORw=";
   };
 
   cargoHash = "sha256-l8zTzr2y8i2ENb8iadIBz59YLmNwfDZcrbUqIUibFqg=";
