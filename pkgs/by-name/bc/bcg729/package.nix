@@ -1,7 +1,7 @@
 {
   lib,
   stdenv,
-  fetchFromGitLab,
+  fetchFromGitHub,
   cmake,
 }:
 
@@ -9,10 +9,8 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "bcg729";
   version = "1.1.1";
 
-  src = fetchFromGitLab {
-    domain = "gitlab.linphone.org";
-    owner = "public";
-    group = "BC";
+  src = fetchFromGitHub {
+    owner = "BelledonneCommunications";
     repo = "bcg729";
     tag = finalAttrs.version;
     hash = "sha256-aRwoblZvmAsKFob7rq5vVkohNZK/A8VDLh45w8cyVME=";
