@@ -11,7 +11,7 @@ stdenv.mkDerivation (finalAttrs: {
   version = "7.5.5";
 
   src = fetchurl {
-    url = "https://waterlan.home.xs4all.nl/dos2unix/dos2unix-${finalAttrs.version}.tar.gz";
+    url = "mirror://sourceforge/project/dos2unix/dos2unix/${finalAttrs.version}/dos2unix-${finalAttrs.version}.tar.gz";
     hash = "sha256-dfaSuEhMjCRXmi/9h98WuclCjtlUl+M5OiHRugaXrDM=";
   };
 
