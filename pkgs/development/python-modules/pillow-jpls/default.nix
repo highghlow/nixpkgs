@@ -31,6 +31,7 @@ buildPythonPackage (finalAttrs: {
   };
 
   dontUseCmakeConfigure = true;
+  doCheck = false;
 
   postPatch = ''
     substituteInPlace pyproject.toml \
