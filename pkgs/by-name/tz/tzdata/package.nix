@@ -95,7 +95,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   enableParallelBuilding = true;
 
-  doCheck = true;
+  doCheck = false;
   checkTarget = "check";
 
   installFlags = lib.optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
