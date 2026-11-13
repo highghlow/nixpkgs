@@ -1,7 +1,7 @@
 {
   stdenv,
   lib,
-  fetchbzr,
+  fetchurl,
   testers,
   autoreconfHook,
   bash,
@@ -17,12 +17,11 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "dbus-test-runner";
-  version = "19.04.0-unstable-2019-10-02";
+  version = "19.04.0";
 
-  src = fetchbzr {
-    url = "lp:dbus-test-runner";
-    rev = "109";
-    hash = "sha256-4yH19X98SVqpviCBIWzIX6FYHWxCbREpuKCNjQuTFDk=";
+  src = fetchurl {
+    url = "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/dbus-test-runner/${finalAttrs.version}-1/dbus-test-runner_${finalAttrs.version}.orig.tar.gz";
+    hash = "sha256-ZFoy+9kJuvLAFDjwy9op3JzQGnq6VQTEVhDYjopXy3Y=";
   };
 
   patches = [
