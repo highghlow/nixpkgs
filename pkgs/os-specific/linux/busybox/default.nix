@@ -86,6 +86,9 @@ stdenv.mkDerivation (finalAttrs: {
     # Fix aarch64 build failure: sha1_process_block64_shaNI is x86-specific
     # https://lists.busybox.net/pipermail/busybox/2024-September/090943.html
     ./fix-aarch64-sha1.patch
+    # Some beef between musl and busybox . Grab your popcorn.
+    # https://www.openwall.com/lists/musl/2024/03/05/4
+    ./fix-for-32bit-musl.patch
     # archival: disallow path traversals (CVE-2023-39810)
     (fetchpatch {
       name = "CVE-2023-39810.patch";
