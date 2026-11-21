@@ -397,6 +397,12 @@ rec {
         family = "arc";
       };
 
+      e2kv6 = {
+        bits = 64;
+        significantByte = littleEndian;
+        family = "e2k";
+      };
+
       loongarch64 = {
         bits = 64;
         significantByte = littleEndian;

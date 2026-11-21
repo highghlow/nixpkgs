@@ -285,6 +285,12 @@ rec {
         bits = 64;
       };
     };
+    isElbrus = {
+      cpu = {
+        family = "e2k";
+        bits = 64;
+      };
+    };
     isLoongArch64 = {
       cpu = {
         family = "loongarch";

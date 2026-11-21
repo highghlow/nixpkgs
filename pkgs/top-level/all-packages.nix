@@ -5882,6 +5882,8 @@ with pkgs;
   # directly if this doesn’t work.
   libglut = if stdenv.hostPlatform.isDarwin then null else freeglut;
 
+  mcst = recurseIntoAttrs (callPackage ../development/mcst { });
+
   mesa =
     if stdenv.hostPlatform.isDarwin then
       callPackage ../development/libraries/mesa/darwin.nix { }

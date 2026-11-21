@@ -241,6 +241,10 @@ rec {
     config = "s390x-unknown-linux-gnu";
   };
 
+  e2kv6 = {
+    config = "e2kv6-unknown-linux-gnu";
+  };
+
   arm-embedded = {
     config = "arm-none-eabi";
   };

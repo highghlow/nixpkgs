@@ -117,6 +117,8 @@ lib.init bootStages
                 buildPackages.arocc
               else if crossSystem.useGccNG or false then
                 buildPackages.gccNGPackages.gcc
+              else if crossSystem.isElbrus or false then
+                buildPackages.mcst.lcc
               else
                 buildPackages.gcc;
 

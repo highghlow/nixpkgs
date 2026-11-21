@@ -573,6 +573,11 @@ stdenvNoCC.mkDerivation {
       wrap ${targetPrefix}arocc $wrapper $ccPath/arocc${exeSuffix}
       ln -s ${targetPrefix}arocc $out/bin/${targetPrefix}cc
       export named_cc=${targetPrefix}arocc
+    elif [ -e $ccPath/lcc${exeSuffix} ]; then
+      wrap ${targetPrefix}lcc $wrapper $ccPath/lcc${exeSuffix}
+      ln -s ${targetPrefix}lcc $out/bin/${targetPrefix}cc
+      export named_cc=${targetPrefix}lcc
+      export named_cxx=${targetPrefix}l++
     fi
 
     if [ -e $ccPath/${targetPrefix}g++${exeSuffix} ]; then
@@ -581,6 +586,9 @@ stdenvNoCC.mkDerivation {
     elif [ -e $ccPath/clang++${exeSuffix} ]; then
       wrap ${targetPrefix}clang++ $wrapper $ccPath/clang++${exeSuffix}
       ln -s ${targetPrefix}clang++ $out/bin/${targetPrefix}c++
+    elif [ -e $ccPath/l++${exeSuffix} ]; then
+      wrap ${targetPrefix}l++ $wrapper $ccPath/l++${exeSuffix}
+      ln -s ${targetPrefix}l++ $out/bin/${targetPrefix}c++
     fi
 
     if [ -e $ccPath/${targetPrefix}cpp${exeSuffix} ]; then
@@ -618,6 +626,9 @@ stdenvNoCC.mkDerivation {
     elif [ -e $ccPath/flang ]; then
       wrap ${targetPrefix}flang $wrapper $ccPath/flang
       export named_fc=${targetPrefix}flang
+    elif [ -e $ccPath/lfortran ]; then
+      wrap ${targetPrefix}lfortran $wrapper $ccPath/lfortran
+      export named_fc=${targetPrefix}lfortran
     fi
   ''
 
