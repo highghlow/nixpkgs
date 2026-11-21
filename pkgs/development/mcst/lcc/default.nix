@@ -25,7 +25,7 @@
   breakpointHook
 }:
 
-assert stdenv.targetPlatform.system == "e2kv6-linux";
+assert stdenv.targetPlatform.system == "e2k-linux";
 let
   version = "1.31.05";
   # TODO: native
@@ -74,7 +74,7 @@ let
         wrapProgram $prog \
           --add-flags "-B $(echo -n $out/lcc-home/*/*/bin/)" \
           --add-flags "-B $(echo -n $out/lcc-home/*/*/lib64/)" \
-          --add-flags "-B ${bintools}/bin/e2kv6-unknown-linux-gnu-" \
+          --add-flags "-B ${bintools}/bin/e2k-unknown-linux-gnu-" \
           --add-flags "-B $out/fs/usr/lib64/"
       done
     '';
@@ -129,8 +129,8 @@ let
 
       for f in "$out/bin/e2k-linux-"*; do
         base=$(basename "$f")
-        f2="$out/bin/e2kv6-unknown-linux-gnu-''${base#e2k-linux-}"
-        f2_unwrapped="$out/bin/.e2kv6-unknown-linux-gnu-''${base#e2k-linux-}"
+        f2="$out/bin/e2k-unknown-linux-gnu-''${base#e2k-linux-}"
+        f2_unwrapped="$out/bin/.e2k-unknown-linux-gnu-''${base#e2k-linux-}"
         mv "$f" "$f2_unwrapped"
         cat > "$f2" <<EOF
 #!${runtimeShell}

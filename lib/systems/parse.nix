@@ -397,7 +397,7 @@ rec {
         family = "arc";
       };
 
-      e2kv6 = {
+      e2k = {
         bits = 64;
         significantByte = littleEndian;
         family = "e2k";

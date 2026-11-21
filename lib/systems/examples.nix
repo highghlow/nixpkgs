@@ -242,7 +242,7 @@ rec {
   };
 
   e2kv6 = {
-    config = "e2kv6-unknown-linux-gnu";
+    config = "e2k-unknown-linux-gnu";
   };
 
   arm-embedded = {
