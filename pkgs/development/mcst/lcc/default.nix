@@ -8,23 +8,61 @@
   wrapBintoolsWith,
   bison,
   flex,
-  breakpointHook,
+  symlinkJoin,
+  cmake,
+  runtimeShell,
+  python3,
 }:
 
 assert stdenv.targetPlatform.system == "e2k-linux";
 let
-  version = "1.31.05";
-  # TODO: native
+  # Version of the open-source parts of the toolchain
+  version = "1.29.16";
+
+  # LCC Version (usually slightly higher)
+  lcc_version = "1.31.05";
+
   src = fetchurl {
     url = "https://dev.mcst.ru/downloads/2026-09-09/cross/cross-sp-public-osl-1.31.05.e2k-v6.linux-6.1_64.tgz";
-    hash = "sha256-vRg10c20Kn6Ga0E2B3qbxJR/8qTYlX8yp2x6SnrPasg=";
+    hash = "sha256-FA26rkJH0htyQhli56fXoO5mUUUkvQKSkP7XOS9EwdQ=";
+    downloadToTemp = true;
+    recursiveHash = true;
+    postFetch = ''
+      mkdir -p $out
+      tar -xzf $downloadedFile -C $out --strip-components=1
+    '';
   };
-  cc = stdenv.mkDerivation {
-    pname = "mcst-lcc";
-    inherit version src;
+
+  # This derivation contains the lcc binary, extra binaries
+  # in bin2, the C runtime other libraries
+  lcc-unwrapped-nolib = stdenv.mkDerivation {
+    pname = "mcst-lcc-nolib";
+    version = lcc_version;
+    inherit src;
 
     installPhase = ''
-      cp -r mcst/* $out
+      mkdir -p $out/include
+      mkdir -p $out/lib
+      mkdir -p $out/bin2
+      mkdir -p $out/bin
+      base=$(echo -n mcst/*)
+      lcc_home=$(echo -n $base/lcc-home/*/*)
+
+      cp $base/bin/* $out/bin
+
+      # LCC intrinsic headers (like limits.h)
+      cp -rL $base/lcc-home/*/*/include/* $out/include
+
+      cp -rL $lcc_home/lib64/*.a $out/lib
+      cp -rL $lcc_home/lib64/*.o $out/lib
+      # .so files in this directory are actually absolute
+      # symlinks, which are broken in nix
+      cp -rL $base/fs/usr/lib64/*.so $out/lib
+      # This is actually a linker script pointing to /lib64
+      rm $out/lib/libc.so
+
+      # Required utilities of the compiler (but not bintools)
+      cp $lcc_home/bin/* $out/bin2
     '';
 
     nativeBuildInputs = [
@@ -42,10 +80,12 @@ let
     postFixup = ''
       for prog in $out/bin/{lcc,cpp,l++,lfortran}; do
         wrapProgram $prog \
-          --add-flags "--sysroot=${libc}" \
-          --add-flags "-B $(echo -n $out/lcc-home/*/*/bin/)" \
-          --add-flags "-B $(echo -n $out/lcc-home/*/*/lib64/)" \
-          --add-flags "-B ${bintools}/bin/e2k-unknown-linux-gnu-"
+          --append-flags "--sysroot=${libc}" \
+          --append-flags "-B ${bintools}/bin/e2k-unknown-linux-gnu-" \
+          --append-flags "-B $out/bin2/" \
+          --append-flags "-B $out/lib/" \
+          --append-flags "-I$out/include" \
+          --append-flags "-L$out/lib"
       done
     '';
 
@@ -58,9 +98,96 @@ let
 
     meta.mainProgram = "lcc";
   };
+
+  lcc-unwrapped-vendor-glibc = symlinkJoin {
+    name = "mcst-lcc";
+    paths = [ lcc-unwrapped-nolib ];
+    nativeBuildInputs = [ makeWrapper ];
+    postBuild = ''
+      mkdir $out/include2
+
+      # The vendored version of glibc is required for
+      # configure to work when building lcc-libs.
+      # Hovewer, we only need the headers.
+      cp -rL ${src}/mcst/*/fs/usr/include/* $out/include2
+
+      for prog in $out/bin/{lcc,cpp,l++,lfortran}; do
+        wrapProgram $prog \
+          --append-flags "-I$out/include2"
+      done
+    '';
+  };
+
+  lcc-libs = stdenv.mkDerivation {
+    pname = "mcst-lcc-libs";
+    inherit version;
+
+    src = fetchurl {
+      url = "https://dev.mcst.ru/downloads/2026-05-27/lcc-libs-1.29.16.tar.gz";
+      hash = "sha256-XDUD96dHC7T64iQKrxC6A7sLVpNTbNSoH+q1UGgq3eg=";
+    };
+
+    patches = [
+      ./lcc-libs-add-cpp.patch
+    ];
+
+    nativeBuildInputs = [
+      cmake
+      python3
+    ];
+
+    dontUseCmakeConfigure = true;
+    dontUseCmakeBuild = true;
+    dontUseCmakeInstall = true;
+    CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+
+    buildPhase = let
+      args =
+         "INSTALL_DIR_LIB=$out/lib "
+       + "INSTALL_DIR_INCLUDE=$out/include "
+       + "LCC=${lcc-unwrapped-vendor-glibc}/bin/lcc "
+       + "LXX=${lcc-unwrapped-vendor-glibc}/bin/l++ "
+       + "CPP=${lcc-unwrapped-vendor-glibc}/bin/cpp "
+       + ''CFLAGS="-Wno-bad-macro-redef" CXXFLAGS="-Wno-bad-macro-redef"'';
+    in /* bash */ ''
+      # To add always-present options to the compiler passed
+      # to CMake, the script generates a small wrapper script.
+      # This script has a bash shebang
+
+      substituteInPlace lib/compiler_rt-11.1.0/build.sh \
+        --replace-fail "/bin/bash" "${runtimeShell}"
+
+      mkdir -p $out/lib
+      bash lib/compiler_rt-11.1.0/build.sh ${args}
+      bash lib/GNU/build_libgcc.sh STAGE=1 ${args}
+      bash lib/GNU/build_libgcc.sh STAGE=2 ${args}
+      bash lib/GNU/build_libgcc.sh STAGE=3 ${args}
+      #bash lib/GNU/build_libquadmath.sh ${args}
+      #bash lib/GNU/build_libstdc++.sh ${args}
+    '';
+  };
+
+  # Here we include lcc-libs, but it is still "unwrapped"
+  # as it doesn't have the bintools or glibc
+  lcc-unwrapped = symlinkJoin {
+    name = "mcst-lcc";
+    paths = [ lcc-unwrapped-nolib ];
+    nativeBuildInputs = [ makeWrapper ];
+    postBuild = ''
+      for prog in $out/bin/{lcc,cpp,l++,lfortran}; do
+        wrapProgram $prog \
+          --add-flags "-L${lcc-libs}/lib/" \
+          --add-flags "-I${lcc-libs}/include/"
+      done
+    '';
+    passthru = {
+      hardeningUnsupportedFlags = lcc-unwrapped-nolib.hardeningUnsupportedFlags;
+    };
+  };
+
   bintools-unwrapped = stdenv.mkDerivation {
     pname = "mcst-lcc-bintools";
-    version = "2.41";
+    inherit version;
     src = fetchurl {
       url = "https://dev.mcst.ru/downloads/2026-11-03/binutils-2.41-29.024.tar.gz";
       hash = "sha256-cXoDlxoAjTzQj4YWXCK7QbYf3oGf0VyA1E/yK7mdFhQ=";
@@ -101,9 +228,6 @@ let
   libc = stdenv.mkDerivation {
     pname = "mcst-lcc-libc";
     inherit version src;
-    nativeBuildInputs = [
-      breakpointHook
-    ];
 
     installPhase = ''
       mkdir -p $out/lib $out/usr
@@ -117,6 +241,23 @@ let
       cp -rL mcst/*/lcc-home/*/*/include $out/include
       cp -rL mcst/*/fs/usr/include $out/include2
     '';
+
+    /*postFixup = ''
+      for script in $out/lib/libc.so $out/lib/libpthread.so; do
+        if [ -f "$script" ]; then
+          substituteInPlace "$script" \
+            --replace-quiet "/usr/lib64/" "$out/~lib64/" \
+            --replace-quiet "/usr/lib/" "$out/~lib/"
+
+          substituteInPlace "$script" \
+            --replace-quiet "/lib64/" "$out/~lib64/" \
+            --replace-quiet "/lib/" "$out/~lib/"
+
+          substituteInPlace "$script" \
+            --replace-quiet "~lib" "lib"
+        fi
+      done
+    '';*/
   };
 
   bintools = wrapBintoolsWith {
@@ -124,8 +265,10 @@ let
     bintools = bintools-unwrapped;
   };
 in
+  /*lcc-libs*/
   wrapCCWith {
-    inherit cc bintools;
+    inherit bintools;
+    cc = lcc-unwrapped;
     nixSupport = {
       cc-cflags = [
         "-idirafter"

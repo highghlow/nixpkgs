@@ -1,0 +1,12 @@
+diff --git a/lib/GNU/build_libgcc.sh b/lib/GNU/build_libgcc.sh
+index 1d4552e..22c8290 100755
+--- a/lib/GNU/build_libgcc.sh
++++ b/lib/GNU/build_libgcc.sh
+@@ -151,6 +151,7 @@ libgcc_configure()
+       --disable-multilib \
+       --disable-decimal-float \
+       CC="$LCC" \
++      CPP="$CPP" \
+       CFLAGS="$CFLAGS" \
+       AR="$($LCC -print-prog-name=ar)" \
+       AS="$($LCC -print-prog-name=as)" \
