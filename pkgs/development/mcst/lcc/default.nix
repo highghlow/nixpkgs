@@ -6,23 +6,9 @@
   makeWrapper,
   wrapCCWith,
   wrapBintoolsWith,
-  runtimeShell,
-  buildPackages,
-  xz,
-  bzip2,
-  libgcc,
-  xxhash,
-  zlib,
-  ncurses,
-  libuuid,
-  libffi,
-  sqlite,
-  gdbm,
-  readline,
+  bison,
   flex,
-  gcc,
-  libxcrypt-legacy,
-  breakpointHook
+  breakpointHook,
 }:
 
 assert stdenv.targetPlatform.system == "e2k-linux";
@@ -46,36 +32,20 @@ let
       autoPatchelfHook
     ];
 
-    buildInputs = [
-    # gcc.cc.lib
-    # xz
-    # bzip2
-    # libgcc
-    # xxhash
-    # ncurses
-    # zlib
-    # libuuid
-    # libffi
-    # sqlite
-    # gdbm
-    # readline
-    # flex
-    # libxcrypt-legacy
-    ];
-
     preFixup = ''
       rm -rf $out/gdb
       rm -rf $out/binutils
       rm -rf $out/bin.toolchain
+      rm -rf $out/fs
     '';
 
     postFixup = ''
       for prog in $out/bin/{lcc,cpp,l++,lfortran}; do
         wrapProgram $prog \
+          --add-flags "--sysroot=${libc}" \
           --add-flags "-B $(echo -n $out/lcc-home/*/*/bin/)" \
           --add-flags "-B $(echo -n $out/lcc-home/*/*/lib64/)" \
-          --add-flags "-B ${bintools}/bin/e2k-unknown-linux-gnu-" \
-          --add-flags "-B $out/fs/usr/lib64/"
+          --add-flags "-B ${bintools}/bin/e2k-unknown-linux-gnu-"
       done
     '';
 
@@ -83,60 +53,48 @@ let
       hardeningUnsupportedFlags = [
         "zerocallusedregs"
         "strictflexarrays1"
-        # Add any other flags lcc doesn't support here later, e.g.:
-        # "stackclashprotection"
-        # "shadowcallstack"
       ];
     };
 
     meta.mainProgram = "lcc";
   };
-  bintools-fhs = buildPackages.buildFHSEnv {
-    name = "mcst-lcc-bintools-fhs";
-
-    targetPkgs = p: [
-      libc
-    ];
-
-    extraBuildCommands = ''
-      rm -rf $out/{,usr/}lib64
-      ln -sf ${libc}/lib $out/lib64
-      ln -sf ${libc}/lib $out/usr/lib64
-    '';
-
-    runScript = "";
-  };
   bintools-unwrapped = stdenv.mkDerivation {
     pname = "mcst-lcc-bintools";
-    inherit version src;
-
-    installPhase = ''
-      cp -r mcst/*/binutils $out
-      cp -r mcst/*/fs $out
-    '';
+    version = "2.41";
+    src = fetchurl {
+      url = "https://dev.mcst.ru/downloads/2026-11-03/binutils-2.41-29.024.tar.gz";
+      hash = "sha256-cXoDlxoAjTzQj4YWXCK7QbYf3oGf0VyA1E/yK7mdFhQ=";
+    };
 
     nativeBuildInputs = [
       makeWrapper
-      autoPatchelfHook
     ];
 
     buildInputs = [
       flex
+      bison
     ];
 
-    postFixup = ''
-      rm -rf $out/e2k-linux/bin
+    configureFlags = [
+      "--disable-gprofng"
+      "--target=e2k-mcst-linux-gnu"
+    ];
 
-      for f in "$out/bin/e2k-linux-"*; do
+    hardeningDisable = [ "format" ];
+
+    env = {
+      NIX_CFLAGS_COMPILE = "-std=gnu17";
+    };
+
+    postFixup = ''
+      for ld in $out/bin/e2k-mcst-linux-gnu-ld{,.bfd}; do
+        wrapProgram "$ld" --add-flags "--sysroot=${libc}"
+      done
+
+      for f in "$out/bin/e2k-mcst-linux-"*; do
         base=$(basename "$f")
-        f2="$out/bin/e2k-unknown-linux-gnu-''${base#e2k-linux-}"
-        f2_unwrapped="$out/bin/.e2k-unknown-linux-gnu-''${base#e2k-linux-}"
-        mv "$f" "$f2_unwrapped"
-        cat > "$f2" <<EOF
-#!${runtimeShell}
-exec ${lib.getExe bintools-fhs} "$f2_unwrapped" "\$@"
-EOF
-        chmod +x "$f2"
+        f2="$out/bin/e2k-unknown-''${base#e2k-mcst-}"
+        ln -s $f $f2
       done
     '';
   };
@@ -148,10 +106,14 @@ EOF
     ];
 
     installPhase = ''
-      mkdir $out
-      cp -rL mcst/*/fs/lib64 $out/lib
-      cp -rL mcst/*/fs/usr/lib64/* $out/lib
+      mkdir -p $out/lib $out/usr
+      cp -rL mcst/*/fs/lib64/* $out/lib/
+      cp -rL mcst/*/fs/usr/lib64/* $out/lib/
       ln -s $out/lib/libgcc_s.so.1 $out/lib/libgcc_s.so
+
+      ln -s $out/lib $out/lib64
+      ln -s $out/lib $out/usr/lib64
+
       cp -rL mcst/*/lcc-home/*/*/include $out/include
       cp -rL mcst/*/fs/usr/include $out/include2
     '';
