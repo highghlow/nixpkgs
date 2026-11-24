@@ -14,7 +14,7 @@ let
   ];
 in
 
-assert stdenv.hostPlatform.system == "e2k-linux";
+#assert stdenv.hostPlatform.system == "e2k-linux";
 (callPackage ./common.nix { inherit stdenv; } {
   inherit withLinuxHeaders withGd profilingLibraries withLibcrypt;
   pname = "glibc-elbrus";
@@ -95,7 +95,7 @@ assert stdenv.hostPlatform.system == "e2k-linux";
       fi
     '';
 
-    postInstall = (if stdenv.hostPlatform == stdenv.buildPlatform then ''
+    postInstall = (if stdenv.targetPlatform == stdenv.buildPlatform then ''
       echo SUPPORTED-LOCALES=C.UTF-8/UTF-8 > ../glibc-2*/localedata/SUPPORTED
       make -j''${NIX_BUILD_CORES:-1} localedata/install-locales
     '' else lib.optionalString stdenv.buildPlatform.isLinux ''
