@@ -1,5 +1,5 @@
 { lib, stdenv, callPackage
-, withLinuxHeaders ? false
+, withLinuxHeaders ? true
 , profilingLibraries ? false
 , withGd ? false
 , withLibcrypt? false
@@ -14,7 +14,7 @@ let
   ];
 in
 
-#assert stdenv.hostPlatform.system == "e2k-linux";
+assert stdenv.targetPlatform.system == "e2k-linux";
 (callPackage ./common.nix { inherit stdenv; } {
   inherit withLinuxHeaders withGd profilingLibraries withLibcrypt;
   pname = "glibc-elbrus";

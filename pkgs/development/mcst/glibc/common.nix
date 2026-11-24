@@ -25,7 +25,8 @@
 { stdenv, lib
 , buildPackages
 , fetchurl
-, linuxHeaders ? null
+, targetPackages
+, linuxHeaders ? targetPackages.mcst.linux-headers
 , gd ? null, libpng ? null
 , libidn2
 , bison
@@ -33,7 +34,7 @@
 }:
 
 { pname
-, withLinuxHeaders ? false
+, withLinuxHeaders ? true
 , profilingLibraries ? false
 , withGd ? false
 , withLibcrypt ? false
@@ -117,6 +118,7 @@ stdenv.mkDerivation ({
       "--sysconfdir=/etc"
       "--enable-stack-protector=strong"
       "--enable-bind-now"
+      (lib.withFeatureAs withLinuxHeaders "headers" "${linuxHeaders}/include")
       "--host=e2k-mcst-linux-gnu"
       (lib.enableFeature profilingLibraries "profile")
     ] ++ lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
@@ -139,9 +141,10 @@ stdenv.mkDerivation ({
   strictDeps = true;
   depsBuildBuild = [ buildPackages.stdenv.cc ];
   nativeBuildInputs = [ bison python3Minimal ] ++ extraNativeBuildInputs;
-  buildInputs = lib.optionals withGd [ gd libpng ] ++ extraBuildInputs;
+  buildInputs = [ linuxHeaders ] ++ lib.optionals withGd [ gd libpng ] ++ extraBuildInputs;
 
   env = {
+    linuxHeaders = lib.optionalString withLinuxHeaders linuxHeaders;
     inherit (stdenv) is64bit;
     # Needed to install share/zoneinfo/zone.tab.  Set to impure /bin/sh to
     # prevent a retained dependency on the bootstrap tools in the stdenv-linux

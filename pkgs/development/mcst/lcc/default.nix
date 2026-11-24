@@ -80,8 +80,9 @@ let
 
       cp $base/bin/* $out/bin
 
-      # LCC intrinsic headers (like limits.h)
-      cp -rL $base/lcc-home/*/*/include/* $out/include
+      # LCC intrinsic headers
+      cp -rL $lcc_home/include/* $out/include
+      cp -rL $base/fs/usr/include/asm $out/include
 
       cp -rL $lcc_home/lib64/*.a $out/lib
       cp -rL $lcc_home/lib64/*.o $out/lib
