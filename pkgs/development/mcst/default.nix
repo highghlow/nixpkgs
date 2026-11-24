@@ -10,6 +10,7 @@ lib.makeScope pkgs.newScope (
     inherit (self) callPackage;
   in
   {
+    glibc = callPackage ./glibc { };
     lcc = callPackage ./lcc { };
   }
 )

@@ -1,0 +1,64 @@
+commit 6cd7fde11bf00ff38cce36849830c75ac4e465c9
+Author: highghlow <highghlow@proton.me>
+Date:   Tue Nov 24 01:10:10 2026 +0300
+
+    Fix unwinding
+
+diff --git a/sysdeps/e2k/jmpbuf-unwind.h b/sysdeps/e2k/jmpbuf-unwind.h
+index 3002035ac6..8c0c43bb35 100644
+--- a/sysdeps/e2k/jmpbuf-unwind.h
++++ b/sysdeps/e2k/jmpbuf-unwind.h
+@@ -4,6 +4,10 @@
+
+ /* Definitions of E2K-specific register types and macros.  */
+
++#ifndef _Unwind_GetPCSP
++extern _Unwind_Word _Unwind_GetPCSP (struct _Unwind_Context *);
++#endif
++
+ #define	E2K_VA_SIZE	48
+ #define	E2K_VA_MSB	(E2K_VA_SIZE - 1)
+
+diff --git a/sysdeps/e2k/unwind-arch.h b/sysdeps/e2k/unwind-arch.h
+index 442a5d479d..9edb96e86a 100644
+--- a/sysdeps/e2k/unwind-arch.h
++++ b/sysdeps/e2k/unwind-arch.h
+@@ -5,6 +5,9 @@
+ #define UNWIND_LINK_FRAME_STATE_FOR 1
+ #define UNWIND_LINK_FRAME_ADJUSTMENT 0
+
++#ifndef _Unwind_GetPCSP
++extern _Unwind_Word _Unwind_GetPCSP (struct _Unwind_Context *);
++#endif
+
+ #define UNWIND_LINK_EXTRA_FIELDS \
+   __typeof (_Unwind_GetPCSP) *ptr__Unwind_GetPCSP;
+diff --git a/sysdeps/generic/unwind-resume.c b/sysdeps/generic/unwind-resume.c
+index 563708e3fc..0c3fbf9fdc 100644
+--- a/sysdeps/generic/unwind-resume.c
++++ b/sysdeps/generic/unwind-resume.c
+@@ -21,6 +21,10 @@
+ #include <sysdep.h>
+ #include <unwind-resume.h>
+
++#ifndef _Unwind_GetPCSP
++extern _Unwind_Word _Unwind_GetPCSP (struct _Unwind_Context *);
++#endif
++
+ static struct unwind_link *
+ link (void)
+ {
+diff --git a/sysdeps/generic/unwind.h b/sysdeps/generic/unwind.h
+index d189d9ca61..126fa24ae1 100644
+--- a/sysdeps/generic/unwind.h
++++ b/sysdeps/generic/unwind.h
+@@ -165,6 +165,9 @@ extern void _Unwind_SetIP (struct _Unwind_Context *, _Unwind_Ptr);
+ extern _Unwind_Word _Unwind_GetCFA (struct _Unwind_Context *);
+
+ #ifdef __e2k__
++#ifndef _Unwind_GetPCSP
++extern _Unwind_Word _Unwind_GetPCSP (struct _Unwind_Context *);
++#endif
+ /* @@@ Retrieve the PCSP of the context preceding the given one.  */
+ extern _Unwind_Word _Unwind_GetPCSP (struct _Unwind_Context *);
+ #endif /* __e2k__  */

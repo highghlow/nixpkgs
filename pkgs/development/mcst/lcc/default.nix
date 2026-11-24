@@ -16,12 +16,11 @@
 
 assert stdenv.targetPlatform.system == "e2k-linux";
 let
-  # Version of the open-source parts of the toolchain
-  version = "1.29.16";
-
-  # LCC Version (usually slightly higher)
-  lcc_version = "1.31.05";
-
+  # The source of proprietary components. Open-source
+  # components have their owns sources. This is used for:
+  # - LCC compiler and libraries
+  # - The dynalic linker
+  # - Glibc (only for bootstrapping)
   src = fetchurl {
     url = "https://dev.mcst.ru/downloads/2026-09-09/cross/cross-sp-public-osl-1.31.05.e2k-v6.linux-6.1_64.tgz";
     hash = "sha256-FA26rkJH0htyQhli56fXoO5mUUUkvQKSkP7XOS9EwdQ=";
@@ -33,11 +32,12 @@ let
     '';
   };
 
-  # This derivation contains the lcc binary, extra binaries
-  # in bin2, the C runtime other libraries
+  # This derivation contains the lcc and all proprietary
+  # libraries distributed with it. The open-source libs
+  # are built from source in separate derivations
   lcc-unwrapped-nolib = stdenv.mkDerivation {
     pname = "mcst-lcc-nolib";
-    version = lcc_version;
+    version = "1.31.05";
     inherit src;
 
     installPhase = ''
@@ -120,7 +120,7 @@ let
 
   lcc-libs = stdenv.mkDerivation {
     pname = "mcst-lcc-libs";
-    inherit version;
+    version = "1.29.16";
 
     src = fetchurl {
       url = "https://dev.mcst.ru/downloads/2026-05-27/lcc-libs-1.29.16.tar.gz";
@@ -187,7 +187,7 @@ let
 
   bintools-unwrapped = stdenv.mkDerivation {
     pname = "mcst-lcc-bintools";
-    inherit version;
+    version = "2.41-29.024";
     src = fetchurl {
       url = "https://dev.mcst.ru/downloads/2026-11-03/binutils-2.41-29.024.tar.gz";
       hash = "sha256-cXoDlxoAjTzQj4YWXCK7QbYf3oGf0VyA1E/yK7mdFhQ=";
@@ -227,7 +227,8 @@ let
   };
   libc = stdenv.mkDerivation {
     pname = "mcst-lcc-libc";
-    inherit version src;
+    version = "1.31.05";
+    inherit src;
 
     installPhase = ''
       mkdir -p $out/lib $out/usr
@@ -241,23 +242,6 @@ let
       cp -rL mcst/*/lcc-home/*/*/include $out/include
       cp -rL mcst/*/fs/usr/include $out/include2
     '';
-
-    /*postFixup = ''
-      for script in $out/lib/libc.so $out/lib/libpthread.so; do
-        if [ -f "$script" ]; then
-          substituteInPlace "$script" \
-            --replace-quiet "/usr/lib64/" "$out/~lib64/" \
-            --replace-quiet "/usr/lib/" "$out/~lib/"
-
-          substituteInPlace "$script" \
-            --replace-quiet "/lib64/" "$out/~lib64/" \
-            --replace-quiet "/lib/" "$out/~lib/"
-
-          substituteInPlace "$script" \
-            --replace-quiet "~lib" "lib"
-        fi
-      done
-    '';*/
   };
 
   bintools = wrapBintoolsWith {
@@ -267,7 +251,7 @@ let
 in
   /*lcc-libs*/
   wrapCCWith {
-    inherit bintools;
+    inherit bintools libc;
     cc = lcc-unwrapped;
     nixSupport = {
       cc-cflags = [
